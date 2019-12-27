@@ -210,27 +210,37 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
     row = 11;
   }
 
-         if (mouseX > SIZE *  1 - 3 && mouseX < SIZE *  3 - 3) {
-    col = 0;
-  } else if (mouseX > SIZE *  3 - 3 && mouseX < SIZE *  5 - 3) {
-    col = 1;
-  } else if (mouseX > SIZE *  5 - 3 && mouseX < SIZE *  7 - 3) {
-    col = 2;
-  } else if (mouseX > SIZE *  7 - 3 && mouseX < SIZE *  9 - 3) {
-    col = 3;
-  } else if (mouseX > SIZE *  9 - 3 && mouseX < SIZE * 11 - 3) {
-    col = 4;
-  } else if (mouseX > SIZE * 11 - 3 && mouseX < SIZE * 13 - 3) {
-    col = 5;
+  if (row == -1) { return; }
+
+  if (0 == row % 2) { // horizontal
+    if (mouseX > SIZE *  1 + 4 && mouseX < SIZE *  3 - 3) {
+      col = 0;
+    } else if (mouseX > SIZE *  3 + 4 && mouseX < SIZE *  5 - 3) {
+      col = 1;
+    } else if (mouseX > SIZE *  5 + 4 && mouseX < SIZE *  7 - 3) {
+      col = 2;
+    } else if (mouseX > SIZE *  7 + 4 && mouseX < SIZE *  9 - 3) {
+      col = 3;
+    } else if (mouseX > SIZE *  9 + 4 && mouseX < SIZE * 11 - 3) {
+      col = 4;
+    }
+  } else { // vertical
+    if (mouseX > SIZE *  1 - 3 && mouseX < SIZE *  1 + 4) {
+      col = 0;
+    } else if (mouseX > SIZE *  3 - 3 && mouseX < SIZE *  3 + 4) {
+      col = 1;
+    } else if (mouseX > SIZE *  5 - 3 && mouseX < SIZE *  5 + 4) {
+      col = 2;
+    } else if (mouseX > SIZE *  7 - 3 && mouseX < SIZE *  7 + 4) {
+      col = 3;
+    } else if (mouseX > SIZE *  9 - 3 && mouseX < SIZE *  9 + 4) {
+      col = 4;
+    } else if (mouseX > SIZE * 11 - 3 && mouseX < SIZE * 11 + 4) {
+      col = 5;
+    }
   }
 
-  std::cout << "mouseY: " << mouseY << std::endl;
-  std::cout << "mouseX: " << mouseX << std::endl;
-
-  std::cout << "row: " << row << std::endl;
-  std::cout << "col: " << col << std::endl;
-
-  if (row == -1 || col == -1) { return; }
+  if (col == -1) { return; }
 
   board->moves[row][col] = C;
   render();
