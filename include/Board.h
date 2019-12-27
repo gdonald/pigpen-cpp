@@ -7,6 +7,8 @@
 #include "Move.h"
 
 #define SIZE 50
+#define ROWS 11
+#define COLS 6
 
 #define P -1
 #define EMPTY 0
@@ -30,8 +32,10 @@ public:
 
   int getWinner();
 
+  int moves[ROWS][COLS]{};
+
 private:
-  int moves[SIZE][SIZE]{};
+
 };
 
 #endif

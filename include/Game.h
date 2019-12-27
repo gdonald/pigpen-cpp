@@ -15,8 +15,6 @@
 
 #define SCREEN_W  600
 #define SCREEN_H 600
-#define BOARD_HW  600
-#define XO (BOARD_HW / SIZE)
 
 #define BTN_W 120
 #define BTN_H 40
@@ -53,13 +51,15 @@ public:
 
   void drawDots();
 
-  void drawGrid();
+  void drawMoves();
+
+  void drawMove(int color, const Sint16 vx[4], const Sint16 vy[4]);
+
+  void drawPCs();
 
   void drawP(Sint16 col, Sint16 row);
 
   void drawC(Sint16 col, Sint16 row);
-
-  void drawPCs();
 
   void drawMenu();
 

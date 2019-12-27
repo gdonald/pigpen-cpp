@@ -92,10 +92,10 @@ void Game::render() {
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, bgTexture, nullptr, nullptr);
 
+  drawMoves();
   drawDots();
 
-//  drawGrid();
-//  drawPCs();
+  //  drawPCs();
 //  drawMenu();
 
   SDL_RenderPresent(renderer);
@@ -120,7 +120,7 @@ void Game::handleEvents() {
         break;
       case SDL_MOUSEBUTTONUP:
         SDL_GetMouseState(&mouseX, &mouseY);
-        //handleClick(&event.button);
+        handleClick(&event.button);
         break;
     }
   }
@@ -133,8 +133,105 @@ void Game::drawDots() {
     for (int x = 0; x < 6; x++) {
       xx = x * SIZE * 2 + SIZE;
       yy = y * SIZE * 2 + SIZE;
-      filledCircleRGBA(renderer, xx, yy - 1, 4, 0x00, 0x00, 0xff, 0x66);
-      filledCircleRGBA(renderer, xx, yy + 1, 4, 0x00, 0x00, 0xff, 0x66);
+      filledCircleRGBA(renderer, xx, yy - 1, 4, 0x00, 0x00, 0xff, 0xaa);
+      filledCircleRGBA(renderer, xx, yy + 1, 4, 0x00, 0x00, 0xff, 0xaa);
     }
   }
+}
+
+void Game::drawMoves() {
+  // vertical
+  for (int y = 1; y < ROWS; y += 2) {
+    for (int x = 0; x < COLS; x++) {
+      if (board->moves[y][x] == EMPTY) { continue; }
+
+      Sint16 x0 = (x * 2 * SIZE) + SIZE - 3;
+      Sint16 x1 = (x * 2 * SIZE) + 4 + SIZE;
+      Sint16 y0 = y * SIZE;
+      Sint16 y1 = (y * SIZE) + (SIZE * 2);
+
+      const Sint16 vx[4] = {x0, x1, x1, x0};
+      const Sint16 vy[4] = {y0, y0, y1, y1};
+
+      drawMove(board->moves[y][x], vx, vy);
+    }
+  }
+
+  // horizontal
+  for (int y = 0; y < ROWS; y += 2) {
+    for (int x = 0; x < COLS; x++) {
+      if (board->moves[y][x] == EMPTY) { continue; }
+
+      Sint16 x0 = (x * 2 * SIZE) + SIZE;
+      Sint16 x1 = (x * 2 * SIZE) + (SIZE * 2) + SIZE;
+      Sint16 y0 = (y * SIZE) + SIZE - 4;
+      Sint16 y1 = (y * SIZE) + SIZE + 2;
+
+      const Sint16 vx[4] = {x0, x1, x1, x0};
+      const Sint16 vy[4] = {y0, y0, y1, y1};
+
+      drawMove(board->moves[y][x], vx, vy);
+    }
+  }
+}
+
+void Game::drawMove(int color, const Sint16 vx[4], const Sint16 vy[4]) {
+  int rgb = color == P ? 0xff : 0x00;
+  filledPolygonRGBA(renderer, vx, vy, 4, rgb, rgb, rgb, 0x99);
+}
+
+void Game::handleClick(SDL_MouseButtonEvent *event) {
+  int row = -1;
+  int col = -1;
+
+         if (mouseY > SIZE *  1 - 4 && mouseY < SIZE *  1 + 2) { // horizontal
+    row = 0;
+  } else if (mouseY > SIZE *  1 + 2 && mouseY < SIZE *  3 - 4) { // vertical
+    row = 1;
+  } else if (mouseY > SIZE *  3 - 4 && mouseY < SIZE *  3 + 2) { // horizontal
+    row = 2;
+  } else if (mouseY > SIZE *  3 + 2 && mouseY < SIZE *  5 - 4) { // vertical
+    row = 3;
+  } else if (mouseY > SIZE *  5 - 4 && mouseY < SIZE *  5 + 2) { // horizontal
+    row = 4;
+  } else if (mouseY > SIZE *  5 + 2 && mouseY < SIZE *  7 - 4) { // vertical
+    row = 5;
+  } else if (mouseY > SIZE *  7 - 4 && mouseY < SIZE *  7 + 2) { // horizontal
+    row = 6;
+  } else if (mouseY > SIZE *  7 + 2 && mouseY < SIZE *  9 - 4) { // vertical
+    row = 7;
+  } else if (mouseY > SIZE *  9 - 4 && mouseY < SIZE *  9 + 2) { // horizontal
+    row = 8;
+  } else if (mouseY > SIZE *  9 + 2 && mouseY < SIZE * 11 - 4) { // vertical
+    row = 9;
+  } else if (mouseY > SIZE * 11 - 4 && mouseY < SIZE * 11 + 2) { // horizontal
+    row = 10;
+  } else if (mouseY > SIZE * 11 + 2 && mouseY < SIZE * 13 - 4) { // vertical
+    row = 11;
+  }
+
+         if (mouseX > SIZE *  1 - 3 && mouseX < SIZE *  1 + 4) { // horizontal
+    col = 0;
+  } else if (mouseX > SIZE *  3 - 3 && mouseX < SIZE *  3 + 4) { // horizontal
+    col = 1;
+  } else if (mouseX > SIZE *  5 - 3 && mouseX < SIZE *  5 + 4) { // horizontal
+    col = 2;
+  } else if (mouseX > SIZE *  7 - 3 && mouseX < SIZE *  5 + 4) { // horizontal
+    col = 3;
+  } else if (mouseX > SIZE *  9 - 3 && mouseX < SIZE *  9 + 4) { // horizontal
+    col = 4;
+  } else if (mouseX > SIZE * 11 - 3 && mouseX < SIZE * 11 + 4) { // horizontal
+    col = 5;
+  }
+
+  std::cout << "mouseY: " << mouseY << std::endl;
+  std::cout << "mouseX: " << mouseX << std::endl;
+
+  std::cout << "row: " << row << std::endl;
+  std::cout << "col: " << col << std::endl;
+
+  if (row == -1 || col == -1) { return; }
+
+  board->moves[row][col] = C;
+  render();
 }
