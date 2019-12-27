@@ -1,3 +1,8 @@
 .idea/
 cmake-build-debug/
 pigpen
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+pigpen.cbp

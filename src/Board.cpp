@@ -7,7 +7,7 @@ Board::Board() {
     for (int col = 0; col < COLS; col++)
       moves[row][col] = EMPTY;
 
-//  // some verticals
+  // some verticals
 //  moves[1][0] = P;
 //  moves[3][1] = C;
 //  moves[5][2] = P;
