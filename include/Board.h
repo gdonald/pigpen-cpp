@@ -9,6 +9,8 @@
 #define SIZE 50
 #define ROWS 11
 #define COLS 6
+#define PC_ROWS 5
+#define PC_COLS 5
 
 #define P -1
 #define EMPTY 0
@@ -24,7 +26,9 @@ public:
 
   bool legalMove(int col, int row);
 
-  void addMove(const Move &move, int xo);
+  void addMove(const Move &move, int pc);
+
+  void assignSquares(const Move &move, int pc);
 
   std::vector<Move> legalMoves();
 
@@ -33,6 +37,8 @@ public:
   int getPC(int col, int row);
 
   int moves[ROWS][COLS]{};
+
+  int pcs[PC_ROWS][PC_COLS]{};
 
 private:
 

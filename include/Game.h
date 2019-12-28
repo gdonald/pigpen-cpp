@@ -79,13 +79,13 @@ public:
 
   void drawC(Sint16 col, Sint16 row);
 
+  void writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color);
+
   void drawMenu();
 
   void drawGameOverMenu();
 
   static bool insideRect(SDL_Rect rect, int x, int y);
-
-  void writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color);
 
 private:
   bool running = false;

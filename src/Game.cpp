@@ -71,7 +71,7 @@ Game::Game(const char *title) {
     exit(EXIT_FAILURE);
   }
 
-  boardFont = TTF_OpenFont(FONT, 212);
+  boardFont = TTF_OpenFont(FONT, 100);
   if (boardFont == nullptr) {
     printf("Failed to load boardFont! Error: %s\n", TTF_GetError());
     exit(EXIT_FAILURE);
@@ -94,8 +94,7 @@ void Game::render() {
 
   drawMoves();
   drawDots();
-
-  //  drawPCs();
+  drawPCs();
 //  drawMenu();
 
   SDL_RenderPresent(renderer);
@@ -178,6 +177,32 @@ void Game::drawMoves() {
 void Game::drawMove(int color, const Sint16 vx[4], const Sint16 vy[4]) {
   int rgb = color == P ? 0xff : 0x00;
   filledPolygonRGBA(renderer, vx, vy, 4, rgb, rgb, rgb, 0x99);
+}
+
+void Game::drawPCs() {
+  for (Sint16 r = 0; r < PC_ROWS; r++) {
+    for (Sint16 c = 0; c < PC_COLS; c++) {
+      int pc = board->getPC(c, r);
+      if (pc == P) drawP(c, r);
+      else if (pc == C) drawC(c, r);
+    }
+  }
+}
+
+void Game::drawP(Sint16 col, Sint16 row) {
+  Sint16 x = (SIZE * 2* col) + SIZE + 15;
+  Sint16 y = (SIZE * 2* row) + SIZE + 13;
+
+  SDL_Color color = {255, 255, 255, 190};
+  writeText("P", x, y, boardFont, color);
+}
+
+void Game::drawC(Sint16 col, Sint16 row) {
+  Sint16 x = (SIZE * 2* col) + SIZE + 12;
+  Sint16 y = (SIZE * 2* row) + SIZE + 13;
+
+  SDL_Color color = {0, 0, 0, 190};
+  writeText("C", x, y, boardFont, color);
 }
 
 void Game::handleClick(SDL_MouseButtonEvent *event) {
@@ -286,8 +311,10 @@ void Game::aiTurn() {
 
   Move m = getAiMove();
 
-  if (m.col > -1 && m.row > -1)
+  if (m.col > -1 && m.row > -1) {
     board->addMove(m, C);
+    board->assignSquares(m, C);
+  }
 }
 
 Move Game::getAiMove() {
@@ -353,3 +380,19 @@ int Game::evaluate(Board *board, int pc) {
 
   return 0;
 }
+
+void Game::writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color) {
+  int w, h;
+
+  SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+  TTF_SizeText(font, text, &w, &h);
+  SDL_Rect rect = {.x = x, .y = y, .w = w, .h = h};
+
+  SDL_RenderCopy(renderer, texture, nullptr, &rect);
+
+  SDL_DestroyTexture(texture);
+  SDL_FreeSurface(surface);
+}
+
