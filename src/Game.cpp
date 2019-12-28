@@ -190,16 +190,16 @@ void Game::drawPCs() {
 }
 
 void Game::drawP(Sint16 col, Sint16 row) {
-  Sint16 x = (SIZE * 2* col) + SIZE + 15;
-  Sint16 y = (SIZE * 2* row) + SIZE + 13;
+  Sint16 x = (SIZE * 2 * col) + SIZE + 15;
+  Sint16 y = (SIZE * 2 * row) + SIZE + 13;
 
   SDL_Color color = {255, 255, 255, 190};
   writeText("P", x, y, boardFont, color);
 }
 
 void Game::drawC(Sint16 col, Sint16 row) {
-  Sint16 x = (SIZE * 2* col) + SIZE + 12;
-  Sint16 y = (SIZE * 2* row) + SIZE + 13;
+  Sint16 x = (SIZE * 2 * col) + SIZE + 12;
+  Sint16 y = (SIZE * 2 * row) + SIZE + 13;
 
   SDL_Color color = {0, 0, 0, 190};
   writeText("C", x, y, boardFont, color);
@@ -268,7 +268,7 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
   if (board->legalMove(col, row)) {
     board->addMove(Move(col, row), P);
 
-    switchTurn();
+//    switchTurn();
     render();
 
     if (gameOver(board)) {
@@ -276,8 +276,8 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
       return;
     }
 
-    std::thread t{aiThread, this};
-    t.join();
+//    std::thread t{aiThread, this};
+//    t.join();
 
     render();
   }
@@ -311,10 +311,8 @@ void Game::aiTurn() {
 
   Move m = getAiMove();
 
-  if (m.col > -1 && m.row > -1) {
+  if (m.col > -1 && m.row > -1)
     board->addMove(m, C);
-    board->assignSquares(m, C);
-  }
 }
 
 Move Game::getAiMove() {
@@ -395,4 +393,3 @@ void Game::writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color c
   SDL_DestroyTexture(texture);
   SDL_FreeSurface(surface);
 }
-
