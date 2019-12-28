@@ -181,6 +181,8 @@ void Game::drawMove(int color, const Sint16 vx[4], const Sint16 vy[4]) {
 }
 
 void Game::handleClick(SDL_MouseButtonEvent *event) {
+  if (!isPlayerTurn() || event->button != SDL_BUTTON_LEFT) { return; }
+
   int row = -1;
   int col = -1;
 
@@ -210,8 +212,6 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
     row = 11;
   }
 
-  if (row == -1) { return; }
-
   if (0 == row % 2) { // horizontal
     if (mouseX > SIZE *  1 + 4 && mouseX < SIZE *  3 - 3) {
       col = 0;
@@ -240,8 +240,116 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
     }
   }
 
-  if (col == -1) { return; }
+  if (board->legalMove(col, row)) {
+    board->addMove(Move(col, row), P);
 
-  board->moves[row][col] = C;
-  render();
+    switchTurn();
+    render();
+
+    if (gameOver(board)) {
+      currentMenu = MenuGameOver;
+      return;
+    }
+
+    std::thread t{aiThread, this};
+    t.join();
+
+    render();
+  }
+}
+
+void Game::switchTurn() {
+  if (!gameOver(board)) {
+    turn = isPlayerTurn() ? C : P;
+  } else {
+    currentMenu = MenuGameOver;
+  }
+}
+
+bool Game::gameOver(Board *board) {
+  if (board->legalMoves().empty()) { return true; }
+  return board->getWinner() != EMPTY;
+}
+
+bool Game::isPlayerTurn() {
+  return turn == P;
+}
+
+void Game::aiThread(Game *game) {
+  game->aiTurn();
+  game->switchTurn();
+}
+
+void Game::aiTurn() {
+  if (isPlayerTurn())
+    return;
+
+  Move m = getAiMove();
+
+  if (m.col > -1 && m.row > -1)
+    board->addMove(m, C);
+}
+
+Move Game::getAiMove() {
+  auto moves = board->legalMoves();
+  int eval;
+  int maxEval = std::numeric_limits<int>::min();
+  Move bestMove = Move(-1, -1);
+
+  for (auto &move : moves) {
+    auto childBoard = Board(*board);
+    childBoard.addMove(move, C);
+    eval = minimax(&childBoard, DEPTH, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+    if (eval > maxEval) {
+      maxEval = eval;
+      bestMove = move;
+    }
+  }
+
+  return bestMove;
+}
+
+int Game::minimax(Board *board, int depth, int alpha, int beta, bool maximizingPlayer) {
+  if (depth == 0 || board->legalMoves().empty() || gameOver(board)) {
+    return evaluate(board, maximizingPlayer ? P : C);
+  }
+
+  int eval;
+
+  if (maximizingPlayer) {
+    int maxEval = std::numeric_limits<int>::min();
+
+    for (auto &move : board->legalMoves()) {
+      auto childBoard = Board(*board);
+      childBoard.addMove(move, C);
+      eval = minimax(&childBoard, depth - 1, alpha, beta, false);
+      maxEval = std::max(maxEval, eval);
+      alpha = std::max(alpha, eval);
+      if (beta <= alpha)
+        break;
+    }
+
+    return maxEval;
+
+  } else {
+    int minEval = std::numeric_limits<int>::max();
+
+    for (auto &move : board->legalMoves()) {
+      auto childBoard = Board(*board);
+      childBoard.addMove(move, P);
+      eval = minimax(&childBoard, depth - 1, alpha, beta, true);
+      minEval = std::min(minEval, eval);
+      beta = std::min(beta, eval);
+      if (beta <= alpha)
+        break;
+    }
+
+    return minEval;
+  }
+}
+
+int Game::evaluate(Board *board, int pc) {
+  // TODO
+
+  return 0;
 }

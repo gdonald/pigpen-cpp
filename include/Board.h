@@ -24,13 +24,13 @@ public:
 
   bool legalMove(int col, int row);
 
-  std::vector<Move> legalMoves();
-
-  int getPC(int col, int row);
-
   void addMove(const Move &move, int xo);
 
+  std::vector<Move> legalMoves();
+
   int getWinner();
+
+  int getPC(int col, int row);
 
   int moves[ROWS][COLS]{};
 

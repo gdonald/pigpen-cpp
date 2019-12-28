@@ -11,7 +11,7 @@
 
 #include "Board.h"
 
-#define DEPTH 7
+#define DEPTH 1
 
 #define SCREEN_W  600
 #define SCREEN_H 600
@@ -55,6 +55,24 @@ public:
 
   void drawMove(int color, const Sint16 vx[4], const Sint16 vy[4]);
 
+  void handleClick(SDL_MouseButtonEvent *event);
+
+  void switchTurn();
+
+  static bool gameOver(Board *board);
+
+  bool isPlayerTurn();
+
+  static void aiThread(Game *game);
+
+  void aiTurn();
+
+  Move getAiMove();
+
+  static int minimax(Board *board, int depth, int alpha, int beta, bool maximizingPlayer);
+
+  static int evaluate(Board *board, int xo);
+
   void drawPCs();
 
   void drawP(Sint16 col, Sint16 row);
@@ -65,25 +83,7 @@ public:
 
   void drawGameOverMenu();
 
-  void handleClick(SDL_MouseButtonEvent *event);
-
   static bool insideRect(SDL_Rect rect, int x, int y);
-
-  bool isPlayerTurn();
-
-  void switchTurn();
-
-  void aiTurn();
-
-  static void aiThread(Game *game);
-
-  Move getAiMove();
-
-  static int minimax(Board *board, int depth, int alpha, int beta, bool maximizingPlayer);
-
-  static int evaluate(Board *board, int xo);
-
-  static bool gameOver(Board *board);
 
   void writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color);
 
