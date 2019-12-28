@@ -11,7 +11,7 @@
 
 #include "Board.h"
 
-#define DEPTH 1
+#define DEPTH 3
 
 #define SCREEN_W  600
 #define SCREEN_H 600
@@ -80,6 +80,8 @@ public:
   void drawC(Sint16 col, Sint16 row);
 
   void writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color);
+
+  static int getOther(int pc);
 
   void drawMenu();
 

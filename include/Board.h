@@ -36,6 +36,8 @@ public:
 
   int getPC(int col, int row);
 
+  int getScore(int pc);
+
   int moves[ROWS][COLS]{};
 
   int pcs[PC_ROWS][PC_COLS]{};

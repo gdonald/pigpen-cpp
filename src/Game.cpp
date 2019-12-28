@@ -268,7 +268,7 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
   if (board->legalMove(col, row)) {
     board->addMove(Move(col, row), P);
 
-//    switchTurn();
+    switchTurn();
     render();
 
     if (gameOver(board)) {
@@ -276,8 +276,8 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
       return;
     }
 
-//    std::thread t{aiThread, this};
-//    t.join();
+    std::thread t{aiThread, this};
+    t.join();
 
     render();
   }
@@ -374,9 +374,10 @@ int Game::minimax(Board *board, int depth, int alpha, int beta, bool maximizingP
 }
 
 int Game::evaluate(Board *board, int pc) {
-  // TODO
+  int other = getOther(pc);
+  int score = board->getScore(pc) - board->getScore(other);
 
-  return 0;
+  return pc == P ? -score : score;
 }
 
 void Game::writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color color) {
@@ -392,4 +393,8 @@ void Game::writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color c
 
   SDL_DestroyTexture(texture);
   SDL_FreeSurface(surface);
+}
+
+int Game::getOther(int pc) {
+  return pc == P ? C : P;
 }
