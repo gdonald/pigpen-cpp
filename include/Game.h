@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <thread>
 
@@ -39,7 +40,7 @@ class Game {
 public:
   ~Game();
 
-  explicit Game(const char *title);
+  explicit Game(const char *title, std::default_random_engine *engine);
 
   bool isRunning();
 
@@ -89,6 +90,8 @@ public:
 
   static bool insideRect(SDL_Rect rect, int x, int y);
 
+  static std::chrono::duration<long long int> wait;
+
 private:
   bool running = false;
   int currentMenu = MenuNone;
@@ -112,6 +115,8 @@ private:
 
   TTF_Font *boardFont;
   TTF_Font *font21;
+
+  std::default_random_engine *engine;
 };
 
 #endif

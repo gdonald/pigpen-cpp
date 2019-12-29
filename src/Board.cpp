@@ -1,6 +1,6 @@
 #include "Board.h"
 
-Board::~Board() {}
+Board::~Board() = default;
 
 Board::Board() {
   for (int row = 0; row < ROWS; row++)
@@ -101,7 +101,7 @@ int Board::getWinner() {
 
   if (pScore > cScore) {
     return P;
-  } else if(cScore > pScore) {
+  } else if (cScore > pScore) {
     return C;
   }
 

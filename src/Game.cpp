@@ -1,5 +1,7 @@
 #include "Game.h"
 
+std::chrono::duration<long long int> Game::wait = std::chrono::seconds(1);
+
 Game::~Game() {
   TTF_CloseFont(boardFont);
   TTF_CloseFont(font21);
@@ -14,7 +16,9 @@ Game::~Game() {
   SDL_Quit();
 }
 
-Game::Game(const char *title) {
+Game::Game(const char *title, std::default_random_engine *eng) {
+  engine = eng;
+
   if (SDL_Init(SDL_INIT_EVERYTHING)) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     exit(EXIT_FAILURE);
@@ -95,7 +99,7 @@ void Game::render() {
   drawMoves();
   drawDots();
   drawPCs();
-//  drawMenu();
+  drawMenu();
 
   SDL_RenderPresent(renderer);
 }
@@ -206,6 +210,27 @@ void Game::drawC(Sint16 col, Sint16 row) {
 }
 
 void Game::handleClick(SDL_MouseButtonEvent *event) {
+  switch (currentMenu) {
+    case MenuGameOver:
+      if (insideRect(btnRects[BtnNo], mouseX, mouseY)) {
+        currentMenu = MenuNone;
+        render();
+        return;
+      }
+      if (insideRect(btnRects[BtnYes], mouseX, mouseY)) {
+        currentMenu = MenuNone;
+        newGame();
+        render();
+        return;
+      }
+      break;
+  }
+
+  if (gameOver(board)) {
+    currentMenu = MenuGameOver;
+    return;
+  }
+
   if (!isPlayerTurn() || event->button != SDL_BUTTON_LEFT) { return; }
 
   int row = -1;
@@ -306,8 +331,10 @@ bool Game::isPlayerTurn() {
 
 void Game::aiThread(Game *game) {
   do {
+    std::this_thread::sleep_for(wait);
     game->aiTurn();
-  } while(game->board->canGoAgain && !gameOver(game->board));
+    game->render();
+  } while (game->board->canGoAgain && !gameOver(game->board));
 
   game->switchTurn();
 }
@@ -324,6 +351,8 @@ void Game::aiTurn() {
 
 Move Game::getAiMove() {
   auto moves = board->legalMoves();
+  std::shuffle(moves.begin(), moves.end(), *engine);
+
   int eval;
   int maxEval = std::numeric_limits<int>::min();
   Move bestMove = Move(-1, -1);
@@ -407,4 +436,73 @@ void Game::writeText(const char *text, int x, int y, TTF_Font *font, SDL_Color c
 
 int Game::getOther(int pc) {
   return pc == P ? C : P;
+}
+
+void Game::drawMenu() {
+  switch (currentMenu) {
+    case MenuGameOver:
+      drawGameOverMenu();
+      break;
+  }
+}
+
+void Game::drawGameOverMenu() {
+  SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xcc);
+  SDL_Rect rect;
+  rect.x = SCREEN_W / 2 - 185;
+  rect.y = SCREEN_W / 2 - 95;
+  rect.h = 190;
+  rect.w = 370;
+  SDL_RenderFillRect(renderer, &rect);
+
+  SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xff);
+  SDL_RenderDrawRect(renderer, &rect);
+
+  std::ostringstream result;
+  result << "Game Over:  ";
+
+  int winner = board->getWinner();
+
+  if (winner == P) {
+    result << "You won!";
+  } else if (winner == C) {
+    result << "You lost!";
+  } else {
+    result << "Tie";
+  }
+
+  SDL_Color color = {255, 255, 255, 0};
+  writeText(result.str().c_str(), 172, 244, font21, color);
+  writeText("Play Again?", 172, 285, font21, color);
+
+  SDL_Rect clip[BtnCount];
+  clip[BtnNo].x = 0;
+  clip[BtnNo].y = BtnUp;
+  clip[BtnNo].w = BTN_W;
+  clip[BtnNo].h = BTN_H;
+
+  clip[BtnYes].x = 0;
+  clip[BtnYes].y = BtnUp;
+  clip[BtnYes].w = BTN_W;
+  clip[BtnYes].h = BTN_H;
+
+  btnRects[BtnNo].x = (SCREEN_W / 2) - BTN_W - (BTN_SPACE / 2);
+  btnRects[BtnNo].y = (int) 330;
+  btnRects[BtnNo].w = BTN_W;
+  btnRects[BtnNo].h = BTN_H;
+
+  btnRects[BtnYes].x = (SCREEN_W / 2) + (BTN_SPACE / 2);
+  btnRects[BtnYes].y = (int) 330;
+  btnRects[BtnYes].w = BTN_W;
+  btnRects[BtnYes].h = BTN_H;
+
+  SDL_RenderCopy(renderer, btnTextures[BtnNo], &clip[BtnNo], &btnRects[BtnNo]);
+  SDL_RenderCopy(renderer, btnTextures[BtnYes], &clip[BtnYes], &btnRects[BtnYes]);
+}
+
+bool Game::insideRect(SDL_Rect rect, int x, int y) {
+  return x > rect.x &&
+         x < rect.x + rect.w &&
+         y > rect.y &&
+         y < rect.y + rect.h;
 }
