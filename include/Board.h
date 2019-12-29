@@ -42,6 +42,8 @@ public:
 
   int pcs[PC_ROWS][PC_COLS]{};
 
+  bool canGoAgain = false;
+
 private:
 
 };

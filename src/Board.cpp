@@ -40,6 +40,8 @@ void Board::addMove(const Move &move, int pc) {
 }
 
 void Board::assignSquares(const Move &move, int pc) {
+  canGoAgain = false;
+
   if (move.row % 2 == 0) { // horizontal
 
     if (move.row < 10) { // below
@@ -47,6 +49,7 @@ void Board::assignSquares(const Move &move, int pc) {
           moves[move.row + 2][move.col] != EMPTY &&     // bottom
           moves[move.row + 1][move.col] != EMPTY) {     // left
         pcs[move.row == 0 ? 0 : (move.row / 2)][move.col] = pc;
+        canGoAgain = true;
       }
     }
 
@@ -55,6 +58,7 @@ void Board::assignSquares(const Move &move, int pc) {
           moves[move.row - 2][move.col] != EMPTY &&     // top
           moves[move.row - 1][move.col] != EMPTY) {     // left
         pcs[(move.row / 2) - 1][move.col] = pc;
+        canGoAgain = true;
       }
     }
 
@@ -65,6 +69,7 @@ void Board::assignSquares(const Move &move, int pc) {
           moves[move.row][move.col + 1] != EMPTY && // right
           moves[move.row + 1][move.col] != EMPTY) { // bottom
         pcs[move.row / 2][move.col] = pc;
+        canGoAgain = true;
       }
     }
 
@@ -73,6 +78,7 @@ void Board::assignSquares(const Move &move, int pc) {
           moves[move.row][move.col - 1] != EMPTY &&     // left
           moves[move.row + 1][move.col - 1] != EMPTY) { // bottom
         pcs[move.row / 2][move.col - 1] = pc;
+        canGoAgain = true;
       }
     }
   }
@@ -90,7 +96,14 @@ std::vector<Move> Board::legalMoves() {
 }
 
 int Board::getWinner() {
-  // TODO
+  int pScore = getScore(P);
+  int cScore = getScore(C);
+
+  if (pScore > cScore) {
+    return P;
+  } else if(cScore > pScore) {
+    return C;
+  }
 
   return EMPTY;
 }
@@ -102,12 +115,9 @@ int Board::getPC(int col, int row) {
 int Board::getScore(int pc) {
   int total = 0;
 
-  for (int row = 0; row < SIZE; row++)
-    for (int col = 0; col < SIZE; col++)
-      if (pcs[row][col] == pc) {
-        total++;
-        break;
-      }
+  for (int row = 0; row < PC_ROWS; row++)
+    for (int col = 0; col < PC_COLS; col++)
+      if (pcs[row][col] == pc) total++;
 
   return total;
 }

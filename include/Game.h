@@ -11,7 +11,7 @@
 
 #include "Board.h"
 
-#define DEPTH 3
+#define DEPTH 1
 
 #define SCREEN_W  600
 #define SCREEN_H 600

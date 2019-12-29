@@ -211,25 +211,25 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
   int row = -1;
   int col = -1;
 
-         if (mouseY > SIZE *  1 - 4 && mouseY < SIZE *  1 + 2) { // horizontal
+  if (mouseY > SIZE * 1 - 4 && mouseY < SIZE * 1 + 2) { // horizontal
     row = 0;
-  } else if (mouseY > SIZE *  1 + 2 && mouseY < SIZE *  3 - 4) { // vertical
+  } else if (mouseY > SIZE * 1 + 2 && mouseY < SIZE * 3 - 4) { // vertical
     row = 1;
-  } else if (mouseY > SIZE *  3 - 4 && mouseY < SIZE *  3 + 2) { // horizontal
+  } else if (mouseY > SIZE * 3 - 4 && mouseY < SIZE * 3 + 2) { // horizontal
     row = 2;
-  } else if (mouseY > SIZE *  3 + 2 && mouseY < SIZE *  5 - 4) { // vertical
+  } else if (mouseY > SIZE * 3 + 2 && mouseY < SIZE * 5 - 4) { // vertical
     row = 3;
-  } else if (mouseY > SIZE *  5 - 4 && mouseY < SIZE *  5 + 2) { // horizontal
+  } else if (mouseY > SIZE * 5 - 4 && mouseY < SIZE * 5 + 2) { // horizontal
     row = 4;
-  } else if (mouseY > SIZE *  5 + 2 && mouseY < SIZE *  7 - 4) { // vertical
+  } else if (mouseY > SIZE * 5 + 2 && mouseY < SIZE * 7 - 4) { // vertical
     row = 5;
-  } else if (mouseY > SIZE *  7 - 4 && mouseY < SIZE *  7 + 2) { // horizontal
+  } else if (mouseY > SIZE * 7 - 4 && mouseY < SIZE * 7 + 2) { // horizontal
     row = 6;
-  } else if (mouseY > SIZE *  7 + 2 && mouseY < SIZE *  9 - 4) { // vertical
+  } else if (mouseY > SIZE * 7 + 2 && mouseY < SIZE * 9 - 4) { // vertical
     row = 7;
-  } else if (mouseY > SIZE *  9 - 4 && mouseY < SIZE *  9 + 2) { // horizontal
+  } else if (mouseY > SIZE * 9 - 4 && mouseY < SIZE * 9 + 2) { // horizontal
     row = 8;
-  } else if (mouseY > SIZE *  9 + 2 && mouseY < SIZE * 11 - 4) { // vertical
+  } else if (mouseY > SIZE * 9 + 2 && mouseY < SIZE * 11 - 4) { // vertical
     row = 9;
   } else if (mouseY > SIZE * 11 - 4 && mouseY < SIZE * 11 + 2) { // horizontal
     row = 10;
@@ -238,27 +238,27 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
   }
 
   if (0 == row % 2) { // horizontal
-    if (mouseX > SIZE *  1 + 4 && mouseX < SIZE *  3 - 3) {
+    if (mouseX > SIZE * 1 + 4 && mouseX < SIZE * 3 - 3) {
       col = 0;
-    } else if (mouseX > SIZE *  3 + 4 && mouseX < SIZE *  5 - 3) {
+    } else if (mouseX > SIZE * 3 + 4 && mouseX < SIZE * 5 - 3) {
       col = 1;
-    } else if (mouseX > SIZE *  5 + 4 && mouseX < SIZE *  7 - 3) {
+    } else if (mouseX > SIZE * 5 + 4 && mouseX < SIZE * 7 - 3) {
       col = 2;
-    } else if (mouseX > SIZE *  7 + 4 && mouseX < SIZE *  9 - 3) {
+    } else if (mouseX > SIZE * 7 + 4 && mouseX < SIZE * 9 - 3) {
       col = 3;
-    } else if (mouseX > SIZE *  9 + 4 && mouseX < SIZE * 11 - 3) {
+    } else if (mouseX > SIZE * 9 + 4 && mouseX < SIZE * 11 - 3) {
       col = 4;
     }
   } else { // vertical
-    if (mouseX > SIZE *  1 - 3 && mouseX < SIZE *  1 + 4) {
+    if (mouseX > SIZE * 1 - 3 && mouseX < SIZE * 1 + 4) {
       col = 0;
-    } else if (mouseX > SIZE *  3 - 3 && mouseX < SIZE *  3 + 4) {
+    } else if (mouseX > SIZE * 3 - 3 && mouseX < SIZE * 3 + 4) {
       col = 1;
-    } else if (mouseX > SIZE *  5 - 3 && mouseX < SIZE *  5 + 4) {
+    } else if (mouseX > SIZE * 5 - 3 && mouseX < SIZE * 5 + 4) {
       col = 2;
-    } else if (mouseX > SIZE *  7 - 3 && mouseX < SIZE *  7 + 4) {
+    } else if (mouseX > SIZE * 7 - 3 && mouseX < SIZE * 7 + 4) {
       col = 3;
-    } else if (mouseX > SIZE *  9 - 3 && mouseX < SIZE *  9 + 4) {
+    } else if (mouseX > SIZE * 9 - 3 && mouseX < SIZE * 9 + 4) {
       col = 4;
     } else if (mouseX > SIZE * 11 - 3 && mouseX < SIZE * 11 + 4) {
       col = 5;
@@ -267,6 +267,11 @@ void Game::handleClick(SDL_MouseButtonEvent *event) {
 
   if (board->legalMove(col, row)) {
     board->addMove(Move(col, row), P);
+
+    if (board->canGoAgain) {
+      render();
+      return;
+    }
 
     switchTurn();
     render();
@@ -292,8 +297,7 @@ void Game::switchTurn() {
 }
 
 bool Game::gameOver(Board *board) {
-  if (board->legalMoves().empty()) { return true; }
-  return board->getWinner() != EMPTY;
+  return board->legalMoves().empty();
 }
 
 bool Game::isPlayerTurn() {
@@ -301,7 +305,10 @@ bool Game::isPlayerTurn() {
 }
 
 void Game::aiThread(Game *game) {
-  game->aiTurn();
+  do {
+    game->aiTurn();
+  } while(game->board->canGoAgain && !gameOver(game->board));
+
   game->switchTurn();
 }
 
@@ -335,7 +342,7 @@ Move Game::getAiMove() {
 }
 
 int Game::minimax(Board *board, int depth, int alpha, int beta, bool maximizingPlayer) {
-  if (depth == 0 || board->legalMoves().empty() || gameOver(board)) {
+  if (depth == 0 || gameOver(board)) {
     return evaluate(board, maximizingPlayer ? P : C);
   }
 
@@ -375,7 +382,10 @@ int Game::minimax(Board *board, int depth, int alpha, int beta, bool maximizingP
 
 int Game::evaluate(Board *board, int pc) {
   int other = getOther(pc);
-  int score = board->getScore(pc) - board->getScore(other);
+
+  int pScore = board->getScore(pc);
+  int cScore = board->getScore(other);
+  int score = pScore - cScore;
 
   return pc == P ? -score : score;
 }
