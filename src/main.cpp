@@ -4,7 +4,7 @@ auto main() -> int {
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine e(seed);
 
-  Game *game = new Game("PigPen", &e);
+  auto game = std::make_unique<Game>("PigPen", &e);
 
   game->render();
 
@@ -12,6 +12,5 @@ auto main() -> int {
     game->handleEvents();
   }
 
-  delete game;
   exit(EXIT_SUCCESS);
 }
