@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Game.h"
 
 std::chrono::duration<long long int> Game::wait = std::chrono::seconds(1);

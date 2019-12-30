@@ -82,6 +82,8 @@ void Board::assignSquares(const Move &move, int pc) {
       }
     }
   }
+
+  if (legalMoves().empty()) canGoAgain = false;
 }
 
 std::vector<Move> Board::legalMoves() {
